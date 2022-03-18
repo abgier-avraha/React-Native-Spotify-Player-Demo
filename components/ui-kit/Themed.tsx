@@ -47,7 +47,6 @@ export function Paper(props: ViewProps) {
 
     elevation: 15,
   };
-  console.log(backgroundColor)
 
   return <View style={[{ backgroundColor, ...shadow }, style]} {...otherProps} />;
 }

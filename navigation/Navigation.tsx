@@ -8,7 +8,9 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as React from 'react';
-import { ColorSchemeName } from 'react-native';
+import { ColorSchemeName, Pressable, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Typography, useThemeColor } from '../components/ui-kit/Themed';
 import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
 import HomeScreen from '../screens/HomeScreen/HomeScreen';
@@ -52,19 +54,49 @@ const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
 function BottomTabNavigator() {
   const colorScheme = useColorScheme();
+  const theme = useThemeColor()
+  const icons: Record<keyof RootTabParamList, React.ComponentProps<typeof Ionicons>['name']> = {
+    Home: 'home',
+    Search: 'search',
+    Library: 'library',
+  };
 
   return (
     <BottomTab.Navigator
+      tabBar={(p) => (
+        <SafeAreaView edges={['bottom']} style={{ flexDirection: 'row', paddingVertical: 12 }}>
+          {p.state.routes.map((r, index) => {
+            const isFocused = p.state.index === index;
+            const onPress = () => {
+              const event = p.navigation.emit({
+                type: 'tabPress',
+                target: r.key,
+                canPreventDefault: true,
+              });
+
+              if (!isFocused && !event.defaultPrevented) {
+                // The `merge: true` option makes sure that the params inside the tab screen are preserved
+                p.navigation.navigate(r.name);
+              }
+            };
+
+            return (
+              <Pressable style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }} onPress={onPress}>
+                <TabBarIcon color={isFocused ? theme.tabIconSelected : theme.tabIconDefault} name={(icons as any)[r.name]} />
+                <Typography style={{ fontSize: 10, color: isFocused ? theme.tabIconSelected : theme.tabIconDefault }}>{r.name}</Typography>
+              </Pressable>
+            )
+          }
+          )}
+        </SafeAreaView>
+      )}
       initialRouteName="Home"
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme].tint,
-      }}>
+    >
       <BottomTab.Screen
         name="Home"
         component={HomeScreen}
         options={({ navigation }: RootTabScreenProps<'Home'>) => ({
           title: 'Home',
-          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
         })}
       />
       <BottomTab.Screen
@@ -72,7 +104,6 @@ function BottomTabNavigator() {
         component={SearchScreen}
         options={{
           title: 'Search',
-          tabBarIcon: ({ color }) => <TabBarIcon name="search" color={color} />,
         }}
       />
       <BottomTab.Screen
@@ -80,7 +111,6 @@ function BottomTabNavigator() {
         component={LibraryScreen}
         options={{
           title: 'Library',
-          tabBarIcon: ({ color }) => <TabBarIcon name="library" color={color} />,
           header: LibraryHeader
         }}
       />
@@ -95,5 +125,5 @@ function TabBarIcon(props: {
   name: React.ComponentProps<typeof Ionicons>['name'];
   color: string;
 }) {
-  return <Ionicons size={30} style={{ marginBottom: -3 }} {...props} />;
+  return <Ionicons size={30} style={{}} {...props} />;
 }
