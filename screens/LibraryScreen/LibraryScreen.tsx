@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { FlatList, Image, StyleSheet, View } from 'react-native';
+import { FlatList, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Typography, Container, Paper } from '../../components/ui-kit/Themed';
 import { RootTabScreenProps } from '../../types';
@@ -11,8 +11,29 @@ const PLAYLISTS = [
     title: 'Liked Songs',
     type: 'Playlist',
     itemCount: 621,
-    art: require('../../assets/images/liked-art.png'),
-  }
+    art: require('../../assets/images/playlists/liked-art.png'),
+  },
+  {
+    id: 2,
+    title: 'Jamming',
+    type: 'Playlist',
+    itemCount: 11,
+    art: require('../../assets/images/playlists/jamming-art.png'),
+  },
+  {
+    id: 3,
+    title: 'Clean and Warm',
+    type: 'Playlist',
+    itemCount: 52,
+    art: require('../../assets/images/playlists/clean-and-warm-art.png'),
+  },
+  {
+    id: 4,
+    title: 'Learn This',
+    type: 'Playlist',
+    itemCount: 23,
+    art: require('../../assets/images/playlists/learn-this-art.png'),
+  },
 ]
 
 export function LibraryHeader() {
@@ -34,15 +55,16 @@ export default function LibraryScreen({ navigation }: RootTabScreenProps<'Librar
   return (
     <Container style={styles.container}>
       <FlatList style={{ flex: 1 }}
+        contentContainerStyle={{ paddingVertical: 10 }}
         data={PLAYLISTS}
         renderItem={(r) => (
-          <View style={{ flexDirection: 'row', padding: 16 }}>
+          <TouchableOpacity style={{ flexDirection: 'row', paddingHorizontal: 16, paddingVertical: 10 }}>
             <Image style={{ aspectRatio: 1, width: 60 }} source={r.item.art} />
             <View style={{ paddingHorizontal: 16, justifyContent: 'center' }}>
               <Typography>{r.item.title}</Typography>
               <Typography intent="muted">{r.item.type} • {r.item.itemCount} songs</Typography>
             </View>
-          </View>
+          </TouchableOpacity>
         )}
         keyExtractor={(r) => r.id.toString()}
       />
