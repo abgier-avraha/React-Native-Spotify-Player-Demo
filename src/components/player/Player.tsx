@@ -79,6 +79,7 @@ export function Player() {
     return {
       borderTopLeftRadius: borderRadius,
       borderTopRightRadius: borderRadius,
+      maxHeight: playerHeight + yTranslation.value * 2,
       transform: [
         {
           translateY: yLimit - yTranslation.value,
@@ -126,7 +127,7 @@ export function Player() {
               left: 0,
               right: 0,
               top: 0,
-              bottom: 0,
+              height: screenHeight,
               backgroundColor: DOMINANT_COLOR,
             },
           ]}
@@ -141,6 +142,7 @@ export function Player() {
               left: 0,
               right: 0,
               top: 0,
+              height: playerHeight,
               backgroundColor: DOMINANT_COLOR,
             },
           ]}
