@@ -29,9 +29,9 @@ export function Player() {
   const screenHeight = Dimensions.get('screen').height;
   const fadeDistance = 50;
 
-  const yLimit = screenHeight - marginBottom - playerHeight;
   const isOpen = useSharedValue(false);
   const yTranslation = useSharedValue(0);
+  const yLimit = screenHeight - marginBottom - playerHeight;
 
   const gestureHandler = useAnimatedGestureHandler({
     onStart: (_, ctx: GestureContext) => {
@@ -73,14 +73,15 @@ export function Player() {
   });
 
   const containerAnimatedStyle = useAnimatedStyle(() => {
+    const percentOpen = yTranslation.value / yLimit;
 
-    const borderRadius = 30 * (yTranslation.value / (screenHeight - playerHeight - marginBottom));
+    const borderRadius = 30 * percentOpen;
     return {
       borderTopLeftRadius: borderRadius,
       borderTopRightRadius: borderRadius,
       transform: [
         {
-          translateY: screenHeight - playerHeight - marginBottom - yTranslation.value,
+          translateY: yLimit - yTranslation.value,
         },
       ],
     };
@@ -90,14 +91,14 @@ export function Player() {
     return {
       opacity:
         1 -
-        (fadeDistance - (yTranslation.value - marginBottom)) / fadeDistance,
+        (fadeDistance - (yTranslation.value)) / fadeDistance,
     };
   });
 
   const miniPlayerAnimatedStyle = useAnimatedStyle(() => {
     return {
       opacity:
-        (fadeDistance - (yTranslation.value - marginBottom)) / fadeDistance,
+        (fadeDistance - (yTranslation.value)) / fadeDistance,
     };
   });
 
