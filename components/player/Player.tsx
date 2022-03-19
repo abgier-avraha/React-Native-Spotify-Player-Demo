@@ -22,9 +22,9 @@ type GestureContext = {
 export function Player() {
   const dragToggleDistance = 200;
   const screenHeight = 680;
-  const playerHeight = 35;
-  const fadeDistance = 200;
-  const defaultMarginBottom = 100;
+  // TODO: measure
+  const playerHeight = 70;
+  const fadeDistance = 50;
 
   const isOpen = useSharedValue(false);
   const currentHeight = useSharedValue(playerHeight);
@@ -71,18 +71,14 @@ export function Player() {
 
   const containerAnimatedStyle = useAnimatedStyle(() => {
     const borderRadius = 30 * (currentHeight.value / screenHeight);
-    const marginBottom =
-      defaultMarginBottom - (currentHeight.value - playerHeight);
     return {
       borderTopLeftRadius: borderRadius,
       borderTopRightRadius: borderRadius,
-      top: screenHeight - currentHeight.value,
-      marginBottom:
-        marginBottom > defaultMarginBottom
-          ? defaultMarginBottom
-          : marginBottom < 0
-          ? 0
-          : marginBottom,
+      transform: [
+        {
+          translateY: screenHeight - currentHeight.value,
+        },
+      ],
     };
   });
 
@@ -106,13 +102,13 @@ export function Player() {
       <Animated.View
         style={[
           {
+            top: 0,
             bottom: 0,
             left: 0,
             right: 0,
             zIndex: 10,
             position: "absolute",
             overflow: "hidden",
-            backgroundColor: DOMINANT_COLOR,
           },
           containerAnimatedStyle,
         ]}
@@ -126,6 +122,7 @@ export function Player() {
               right: 0,
               top: 0,
               bottom: 0,
+              backgroundColor: DOMINANT_COLOR,
             },
           ]}
         >
@@ -134,7 +131,14 @@ export function Player() {
         <Animated.View
           style={[
             miniPlayerAnimatedStyle,
-            { position: "absolute", left: 0, right: 0, top: 0, bottom: 0 },
+            {
+              position: "absolute",
+              left: 0,
+              right: 0,
+              top: 0,
+              height: playerHeight,
+              backgroundColor: DOMINANT_COLOR,
+            },
           ]}
         >
           <MiniPlayer />
@@ -150,15 +154,11 @@ function FullPlayer() {
       start={{ x: 0, y: 0.4 }}
       colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.5)"]}
       style={{
-        position: "absolute",
-        left: 0,
-        right: 0,
-        top: 0,
-        bottom: 0,
+        flex: 1,
         padding: 24,
       }}
     >
-      <SafeAreaView style={{ flex: 0.5 }}>
+      <SafeAreaView edges={["top"]} style={{ flex: 0.8 }}>
         <Typography>
           <Ionicons size={32} name="chevron-down"></Ionicons>
         </Typography>
