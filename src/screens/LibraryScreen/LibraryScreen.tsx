@@ -3,7 +3,7 @@ import React from 'react';
 import { FlatList, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Typography, Container, Paper } from '../../components/ui-kit/Themed';
-import { RootTabScreenProps } from '../../types';
+import { RootTabScreenProps } from '../../../types';
 
 const PLAYLISTS = [
   {
@@ -11,28 +11,28 @@ const PLAYLISTS = [
     title: 'Liked Songs',
     type: 'Playlist',
     itemCount: 621,
-    art: require('../../assets/images/playlists/liked-art.png'),
+    art: require('../../../assets/images/playlists/liked-art.png'),
   },
   {
     id: 2,
     title: 'Jamming',
     type: 'Playlist',
     itemCount: 11,
-    art: require('../../assets/images/playlists/jamming-art.png'),
+    art: require('../../../assets/images/playlists/jamming-art.png'),
   },
   {
     id: 3,
     title: 'Clean and Warm',
     type: 'Playlist',
     itemCount: 52,
-    art: require('../../assets/images/playlists/clean-and-warm-art.png'),
+    art: require('../../../assets/images/playlists/clean-and-warm-art.png'),
   },
   {
     id: 4,
     title: 'Learn This',
     type: 'Playlist',
     itemCount: 23,
-    art: require('../../assets/images/playlists/learn-this-art.png'),
+    art: require('../../../assets/images/playlists/learn-this-art.png'),
   },
 ]
 

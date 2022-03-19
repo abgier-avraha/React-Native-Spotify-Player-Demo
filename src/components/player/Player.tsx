@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { Image, View } from "react-native";
+import { Dimensions, Image, View } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedGestureHandler,
@@ -20,48 +20,51 @@ type GestureContext = {
 };
 
 export function Player() {
-  const dragToggleDistance = 200;
-  const screenHeight = 680;
   // TODO: measure
   const playerHeight = 70;
+  // TODO: get from props
+  const marginBottom = 90;
+
+  const dragToggleDistance = 150;
+  const screenHeight = Dimensions.get('screen').height;
   const fadeDistance = 50;
 
+  const yLimit = screenHeight - marginBottom - playerHeight;
   const isOpen = useSharedValue(false);
-  const currentHeight = useSharedValue(playerHeight);
+  const yTranslation = useSharedValue(0);
 
   const gestureHandler = useAnimatedGestureHandler({
     onStart: (_, ctx: GestureContext) => {
-      ctx.startY = currentHeight.value;
+      ctx.startY = yTranslation.value;
     },
     onActive: (event, ctx: GestureContext) => {
       const newValue = ctx.startY - event.translationY;
-      currentHeight.value =
-        newValue < playerHeight
-          ? playerHeight
-          : newValue > screenHeight
-          ? screenHeight
-          : newValue;
+
+      yTranslation.value =
+        newValue < 0
+          ? 0
+          : newValue > yLimit
+            ? yLimit
+            : newValue;
 
       if (
-        currentHeight.value - ctx.startY > dragToggleDistance &&
-        currentHeight.value > playerHeight
+        yTranslation.value - ctx.startY > dragToggleDistance
       ) {
         isOpen.value = true;
       } else if (
-        currentHeight.value - ctx.startY < dragToggleDistance &&
-        currentHeight.value < screenHeight
+        yTranslation.value - ctx.startY < -dragToggleDistance
       ) {
         isOpen.value = false;
       }
     },
     onEnd: (_) => {
       if (isOpen.value) {
-        currentHeight.value = withSpring(screenHeight, {
+        yTranslation.value = withSpring(yLimit, {
           stiffness: 500,
           damping: 500,
         });
       } else {
-        currentHeight.value = withSpring(playerHeight, {
+        yTranslation.value = withSpring(0, {
           stiffness: 500,
           damping: 500,
         });
@@ -70,13 +73,14 @@ export function Player() {
   });
 
   const containerAnimatedStyle = useAnimatedStyle(() => {
-    const borderRadius = 30 * (currentHeight.value / screenHeight);
+
+    const borderRadius = 30 * (yTranslation.value / (screenHeight - playerHeight - marginBottom));
     return {
       borderTopLeftRadius: borderRadius,
       borderTopRightRadius: borderRadius,
       transform: [
         {
-          translateY: screenHeight - currentHeight.value,
+          translateY: screenHeight - playerHeight - marginBottom - yTranslation.value,
         },
       ],
     };
@@ -86,14 +90,14 @@ export function Player() {
     return {
       opacity:
         1 -
-        (fadeDistance - (currentHeight.value - playerHeight)) / fadeDistance,
+        (fadeDistance - (yTranslation.value - marginBottom)) / fadeDistance,
     };
   });
 
   const miniPlayerAnimatedStyle = useAnimatedStyle(() => {
     return {
       opacity:
-        (fadeDistance - (currentHeight.value - playerHeight)) / fadeDistance,
+        (fadeDistance - (yTranslation.value - marginBottom)) / fadeDistance,
     };
   });
 
@@ -136,7 +140,6 @@ export function Player() {
               left: 0,
               right: 0,
               top: 0,
-              height: playerHeight,
               backgroundColor: DOMINANT_COLOR,
             },
           ]}
@@ -171,7 +174,7 @@ function FullPlayer() {
             flex: 1,
             aspectRatio: 1,
           }}
-          source={require("../../assets/images/albums/ma-drive-slow-art.jpg")}
+          source={require("../../../assets/images/albums/ma-drive-slow-art.jpg")}
         />
       </Paper>
       <View
@@ -278,7 +281,7 @@ function MiniPlayer() {
             aspectRatio: 1,
             marginRight: 10,
           }}
-          source={require("../../assets/images/albums/ma-drive-slow-art.jpg")}
+          source={require("../../../assets/images/albums/ma-drive-slow-art.jpg")}
         />
 
         <View style={{ flex: 1 }}>

@@ -2,11 +2,11 @@ import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "react-native-gesture-handler";
 
-import useCachedResources from "./hooks/useCachedResources";
-import useColorScheme from "./hooks/useColorScheme";
-import Navigation from "./navigation/Navigation";
+import useCachedResources from "./src/hooks/useCachedResources";
+import useColorScheme from "./src/hooks/useColorScheme";
+import Navigation from "./src/navigation/Navigation";
 import React from "react";
-import { Player } from "./components/player/Player";
+import { Player } from "./src/components/player/Player";
 
 export default function App() {
   const isLoadingComplete = useCachedResources();
