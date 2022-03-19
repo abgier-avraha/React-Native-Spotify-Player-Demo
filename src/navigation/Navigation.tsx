@@ -14,12 +14,13 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as React from "react";
 import {
   ColorSchemeName,
+  LayoutChangeEvent,
   Pressable,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Player } from "../components/player/Player";
+import { Player } from "../components/ui-kit/Player";
 import { Typography, useThemeColor } from "../components/ui-kit/Themed";
 import Colors from "../constants/Colors";
 import useColorScheme from "../hooks/useColorScheme";
@@ -33,20 +34,19 @@ import {
   RootStackParamList,
   RootTabParamList,
   RootTabScreenProps,
-} from "../types";
+} from "../../types";
 import LinkingConfiguration from "./LinkingConfiguration";
 
-export default function Navigation({
-  colorScheme,
-}: {
+export default function Navigation(props: {
   colorScheme: ColorSchemeName;
+  onTabBarLayout: (event: LayoutChangeEvent) => void;
 }) {
   return (
     <NavigationContainer
       linking={LinkingConfiguration}
-      theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+      theme={props.colorScheme === "dark" ? DarkTheme : DefaultTheme}
     >
-      <RootNavigator />
+      <RootNavigator onTabBarLayout={props.onTabBarLayout} />
     </NavigationContainer>
   );
 }
@@ -57,14 +57,20 @@ export default function Navigation({
  */
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-function RootNavigator() {
+function RootNavigator(props: {
+
+  onTabBarLayout: (event: LayoutChangeEvent) => void
+}) {
   return (
     <Stack.Navigator>
       <Stack.Screen
         name="Root"
-        component={BottomTabNavigator}
         options={{ headerShown: false }}
-      />
+      >
+        {() =>
+          <BottomTabNavigator onLayout={props.onTabBarLayout} />
+        }
+      </Stack.Screen>
       <Stack.Screen
         name="NotFound"
         component={NotFoundScreen}
@@ -80,7 +86,9 @@ function RootNavigator() {
  */
 const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
-function BottomTabNavigator() {
+function BottomTabNavigator(props: {
+  onLayout: (event: LayoutChangeEvent) => void
+}) {
   const theme = useThemeColor();
   const icons: Record<
     keyof RootTabParamList,
@@ -97,6 +105,7 @@ function BottomTabNavigator() {
         <SafeAreaView
           edges={["bottom"]}
           style={{ flexDirection: "row", paddingVertical: 12 }}
+          onLayout={props.onLayout}
         >
           {p.state.routes.map((r, index) => {
             const isFocused = p.state.index === index;

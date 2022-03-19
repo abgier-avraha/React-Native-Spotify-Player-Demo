@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
 
 import { Typography, Container } from '../../components/ui-kit/Themed';
-import { RootTabScreenProps } from '../../types';
+import { RootTabScreenProps } from '../../../types';
 
 export default function HomeScreen({ navigation }: RootTabScreenProps<'Home'>) {
   return (

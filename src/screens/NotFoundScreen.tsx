@@ -1,7 +1,7 @@
 import { StyleSheet, TouchableOpacity } from 'react-native';
 
 import { Typography, Container } from '../components/ui-kit/Themed';
-import { RootStackScreenProps } from '../types';
+import { RootStackScreenProps } from '../../types';
 
 export default function NotFoundScreen({ navigation }: RootStackScreenProps<'NotFound'>) {
   return (
