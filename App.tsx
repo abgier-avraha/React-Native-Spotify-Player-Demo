@@ -22,7 +22,7 @@ export default function App() {
       <SafeAreaProvider>
         <StatusBar style={colorScheme === "light" ? "inverted" : "auto"} />
         {tabBarHeight &&
-          <Player fullPlayer={FullPlayer} miniPlayer={MiniPlayer} marginBottom={tabBarHeight} />
+          <Player fullPlayer={() => <FullPlayer />} miniPlayer={() => <MiniPlayer />} marginBottom={tabBarHeight} />
         }
         <Navigation onTabBarLayout={(e) => {
           setTabBarHeight(e.nativeEvent.layout.height)
