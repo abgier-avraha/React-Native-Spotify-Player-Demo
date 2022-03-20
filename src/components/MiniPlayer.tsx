@@ -26,7 +26,7 @@ export function MiniPlayer(props: { onPress: () => void }) {
           overflow: 'hidden',
         }]}
       >
-        <TouchableOpacity onPress={props.onPress} style={{
+        <View style={{
           flex: 1,
           backgroundColor: "rgba(0,0,0,0.7)",
           flexDirection: 'row',
@@ -60,7 +60,7 @@ export function MiniPlayer(props: { onPress: () => void }) {
             </Typography>
           </View>
 
-        </TouchableOpacity>
+        </View>
       </Animated.View>
     </View>
   );
