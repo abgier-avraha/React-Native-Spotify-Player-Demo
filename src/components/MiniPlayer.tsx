@@ -1,14 +1,17 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { View, Image, TouchableOpacity } from "react-native";
+import { Image, TouchableOpacity, View } from "react-native";
+import { useSongs } from "../hooks/useSongs";
 import { Typography } from "./ui-kit/Themed";
 
 export function MiniPlayer(props: { onPress: () => void }) {
+  const songs = useSongs();
+
   return (
     <TouchableOpacity
       style={{
         flex: 1,
-        backgroundColor: "#446070",
+        backgroundColor: songs.selectedSong?.color,
       }}
       onPress={props.onPress}
     >
@@ -16,7 +19,7 @@ export function MiniPlayer(props: { onPress: () => void }) {
         style={{
           flex: 1,
           padding: 12,
-          backgroundColor: "rgba(0,0,0,0.6)",
+          backgroundColor: "rgba(0,0,0,0.7)",
         }}
       >
         <View
@@ -33,12 +36,12 @@ export function MiniPlayer(props: { onPress: () => void }) {
               aspectRatio: 1,
               marginRight: 10,
             }}
-            source={require("../../assets/images/albums/ma-drive-slow-art.jpg")}
+            source={songs.selectedSong?.albumArt}
           />
 
           <View style={{ flex: 1 }}>
-            <Typography>Easy</Typography>
-            <Typography intent="muted">Mac Ayres</Typography>
+            <Typography>{songs.selectedSong?.song}</Typography>
+            <Typography intent="muted">{songs.selectedSong?.artist}</Typography>
           </View>
 
           <View>
