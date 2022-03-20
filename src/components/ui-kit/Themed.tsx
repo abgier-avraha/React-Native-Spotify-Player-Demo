@@ -44,7 +44,6 @@ export function Paper(props: ViewProps) {
     },
     shadowOpacity: 0.43,
     shadowRadius: 9.51,
-
     elevation: 15,
   };
 

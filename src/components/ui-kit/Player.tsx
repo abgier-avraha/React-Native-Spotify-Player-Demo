@@ -12,11 +12,18 @@ type GestureContext = {
   startY: number;
 };
 
-export function Player(props: { marginBottom: number, miniPlayer: () => React.ReactNode, fullPlayer: () => React.ReactNode, miniPlayerHeight?: number }) {
+interface IProps {
+  marginBottom: number;
+  miniPlayer: (props: { onPress: () => void }) => React.ReactNode;
+  fullPlayer: (props: { onPressClose: () => void }) => React.ReactNode;
+  miniPlayerHeight?: number;
+}
+
+export function Player(props: IProps) {
   const { miniPlayerHeight = 70 } = props;
 
   const dragToggleDistance = 150;
-  const screenHeight = Dimensions.get('screen').height;
+  const screenHeight = Dimensions.get('window').height;
   const fadeDistance = 50;
 
   const isOpen = useSharedValue(false);
@@ -121,7 +128,12 @@ export function Player(props: { marginBottom: number, miniPlayer: () => React.Re
             },
           ]}
         >
-          {props.fullPlayer()}
+          {props.fullPlayer({
+            onPressClose: () => yTranslation.value = withSpring(0, {
+              stiffness: 500,
+              damping: 500,
+            })
+          })}
         </Animated.View>
         <Animated.View
           style={[
@@ -135,7 +147,12 @@ export function Player(props: { marginBottom: number, miniPlayer: () => React.Re
             },
           ]}
         >
-          {props.miniPlayer()}
+          {props.miniPlayer({
+            onPress: () => yTranslation.value = withSpring(yLimit, {
+              stiffness: 500,
+              damping: 500,
+            })
+          })}
         </Animated.View>
       </Animated.View>
     </PanGestureHandler>

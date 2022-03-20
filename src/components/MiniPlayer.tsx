@@ -1,15 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { View, Image } from "react-native";
+import { View, Image, TouchableOpacity } from "react-native";
 import { Typography } from "./ui-kit/Themed";
 
-export function MiniPlayer() {
+export function MiniPlayer(props: { onPress: () => void }) {
   return (
-    <View
+    <TouchableOpacity
       style={{
         flex: 1,
         backgroundColor: "#446070",
       }}
+      onPress={props.onPress}
     >
       <View
         style={{
@@ -47,6 +48,6 @@ export function MiniPlayer() {
           </View>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }

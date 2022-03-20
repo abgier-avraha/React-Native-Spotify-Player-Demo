@@ -42,7 +42,7 @@ const songs: ISong[] = [
 
 const componentWidth = Dimensions.get("window").width;
 
-export function FullPlayer() {
+export function FullPlayer(props: { onPressClose: () => void }) {
   const [hoveredSongIndex, setHoveredSongIndex] = useState<number | undefined>();
   const [selectedSongId, setSelectedSongId] = useState(songs[0].id);
   const selectedSongColor = useSharedValue("#000");
@@ -101,7 +101,9 @@ export function FullPlayer() {
       >
         <SafeAreaView edges={["top"]} style={{ flex: 0.8, padding: 24 }}>
           <Typography>
-            <Ionicons size={32} name="chevron-down"></Ionicons>
+            <TouchableOpacity style={{ flexDirection: 'row' }} onPress={() => props.onPressClose()}>
+              <Typography><Ionicons size={32} name="chevron-down"></Ionicons></Typography>
+            </TouchableOpacity>
           </Typography>
         </SafeAreaView>
         <View style={{ flex: 5.5 }}>

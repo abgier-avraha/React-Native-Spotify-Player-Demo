@@ -9,6 +9,7 @@ import React, { useState } from "react";
 import { Player } from "./src/components/ui-kit/Player";
 import { MiniPlayer } from "./src/components/MiniPlayer";
 import { FullPlayer } from "./src/components/FullPlayer";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function App() {
   const isLoadingComplete = useCachedResources();
@@ -20,13 +21,19 @@ export default function App() {
   } else {
     return (
       <SafeAreaProvider>
-        <StatusBar style={colorScheme === "light" ? "inverted" : "auto"} />
-        {tabBarHeight &&
-          <Player fullPlayer={() => <FullPlayer />} miniPlayer={() => <MiniPlayer />} marginBottom={tabBarHeight} />
-        }
-        <Navigation onTabBarLayout={(e) => {
-          setTabBarHeight(e.nativeEvent.layout.height)
-        }} colorScheme={colorScheme} />
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <StatusBar style={colorScheme === "light" ? "inverted" : "auto"} />
+          {tabBarHeight &&
+            <Player
+              fullPlayer={(props) => <FullPlayer {...props} />}
+              miniPlayer={(props) => <MiniPlayer {...props} />}
+              marginBottom={tabBarHeight}
+            />
+          }
+          <Navigation onTabBarLayout={(e) => {
+            setTabBarHeight(e.nativeEvent.layout.height)
+          }} colorScheme={colorScheme} />
+        </GestureHandlerRootView>
       </SafeAreaProvider>
     );
   }
