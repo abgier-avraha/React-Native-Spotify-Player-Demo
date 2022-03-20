@@ -1,13 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { createRef, useCallback, useEffect, useState } from "react";
 import { Dimensions, Image, NativeScrollEvent, NativeSyntheticEvent, View } from "react-native";
 import { FlatList, TouchableOpacity } from "react-native-gesture-handler";
-import Animated, { interpolateColor, useAnimatedStyle, useDerivedValue, useSharedValue, withTiming } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { usePrevious } from "../hooks/usePrevious";
 import { useSettings } from "../hooks/useSettings";
 import { useSongs } from "../hooks/useSongs";
+import { InterpolatingBackground } from "./ui-kit/InterpolatingBackground";
 import { Paper, Typography } from "./ui-kit/Themed";
 
 const componentWidth = Dimensions.get("window").width;
@@ -15,53 +14,25 @@ const componentWidth = Dimensions.get("window").width;
 export function FullPlayer(props: { onPressClose: () => void }) {
   const settings = useSettings();
   const songs = useSongs();
+
+  const flatList = createRef<FlatList>();
   const [hoveredSongIndex, setHoveredSongIndex] = useState<number | undefined>();
-
-  const previousSong = usePrevious(songs.selectedSong);
-
-  const selectedSongColor = useSharedValue(songs.selectedSong?.color ?? "#000");
-  const lastSongColor = useSharedValue("#000");
-  const toggleAnimation = useSharedValue(0);
-
-  useEffect(() => {
-    if (songs.selectedSong && previousSong) {
-      lastSongColor.value = previousSong.color;
-      selectedSongColor.value = songs.selectedSong.color;
-      toggleAnimation.value = 1;
-    }
-  }, [songs.selectedSong])
-
-
-  const progress = useDerivedValue(() => {
-    return withTiming(toggleAnimation.value, { duration: 300 }, (e) => {
-      if (e) {
-        lastSongColor.value = selectedSongColor.value;
-        toggleAnimation.value = 0;
-      }
-    })
-  });
-
-
-  const animationStyle = useAnimatedStyle(() => {
-    const backgroundColor = interpolateColor(
-      progress.value,
-      [0, 1],
-      [lastSongColor.value, selectedSongColor.value]
-    );
-
-    return {
-      backgroundColor: backgroundColor,
-    }
-  }, [])
 
   const onScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const index = Math.abs(Math.round(event.nativeEvent.contentOffset.x / componentWidth));
     setHoveredSongIndex(index)
   }, []);
 
+  useEffect(() => {
+    if (flatList.current && songs.selectedSong) {
+      flatList.current.scrollToIndex({ index: songs.songList.indexOf(songs.selectedSong) })
+    }
+  }, [songs.selectedSong])
+
   return (
-    <Animated.View
-      style={[animationStyle, { flex: 1 }]}
+    <InterpolatingBackground
+      backgroundColor={songs.selectedSong?.color ?? "#000"}
+      style={{ flex: 1 }}
     >
       <LinearGradient
         style={{ flex: 1 }}
@@ -77,11 +48,15 @@ export function FullPlayer(props: { onPressClose: () => void }) {
         </SafeAreaView>
         <View style={{ flex: 5.5 }}>
           <FlatList
+            ref={flatList}
             snapToAlignment="center"
             snapToInterval={componentWidth}
             showsHorizontalScrollIndicator={false}
             decelerationRate={"fast"}
             data={songs.songList}
+            getItemLayout={(_, index) => (
+              { length: componentWidth, offset: componentWidth * index, index }
+            )}
             horizontal
             keyExtractor={(i) => i.id.toString()}
             onScroll={onScroll}
@@ -189,7 +164,7 @@ export function FullPlayer(props: { onPressClose: () => void }) {
           </View>
         </View>
       </LinearGradient>
-    </Animated.View>
+    </InterpolatingBackground>
   );
 }
 
