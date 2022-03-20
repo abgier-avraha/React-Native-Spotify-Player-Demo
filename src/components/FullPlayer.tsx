@@ -1,43 +1,34 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { createRef, useCallback, useEffect, useState } from "react";
-import { Dimensions, Image, NativeScrollEvent, NativeSyntheticEvent, View } from "react-native";
+import { Image, NativeScrollEvent, NativeSyntheticEvent, View } from "react-native";
 import { FlatList, TouchableOpacity } from "react-native-gesture-handler";
+import Animated from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSettings } from "../hooks/useSettings";
 import { useSongs } from "../hooks/useSongs";
-import { InterpolatingBackground } from "./ui-kit/InterpolatingBackground";
+import { useAnimatedBackgroundColor } from "../hooks/useAnimatedBackgroundColor";
 import { Paper, Typography } from "./ui-kit/Themed";
 
-const componentWidth = Dimensions.get("window").width;
 
 export function FullPlayer(props: { onPressClose: () => void }) {
-  const settings = useSettings();
+  const [scrollerWidth, setScrollerWidth] = useState<number>(0);
   const songs = useSongs();
-
-  const flatList = createRef<FlatList>();
-  const [hoveredSongIndex, setHoveredSongIndex] = useState<number | undefined>();
-
-  const onScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const index = Math.abs(Math.round(event.nativeEvent.contentOffset.x / componentWidth));
-    setHoveredSongIndex(index)
-  }, []);
-
-  useEffect(() => {
-    if (flatList.current && songs.selectedSong) {
-      flatList.current.scrollToIndex({ index: songs.songList.indexOf(songs.selectedSong) })
-    }
-  }, [songs.selectedSong])
+  const animatedBackgroundColor = useAnimatedBackgroundColor(songs.selectedSong?.color ?? "#000");
 
   return (
-    <InterpolatingBackground
-      backgroundColor={songs.selectedSong?.color ?? "#000"}
-      style={{ flex: 1 }}
+    <Animated.View
+      style={[animatedBackgroundColor, {
+        flex: 1,
+      }]}
     >
       <LinearGradient
         style={{ flex: 1 }}
         start={{ x: 0, y: 0.2 }}
         colors={["rgba(0,0,0,0.3)", "rgba(0,0,0,0.8)"]}
+        onLayout={(e) => {
+          setScrollerWidth(e.nativeEvent.layout.width)
+        }}
       >
         <SafeAreaView edges={["top"]} style={{ flex: 0.8, padding: 24 }}>
           <Typography>
@@ -47,43 +38,7 @@ export function FullPlayer(props: { onPressClose: () => void }) {
           </Typography>
         </SafeAreaView>
         <View style={{ flex: 5.5 }}>
-          <FlatList
-            ref={flatList}
-            snapToAlignment="center"
-            snapToInterval={componentWidth}
-            showsHorizontalScrollIndicator={false}
-            decelerationRate={"fast"}
-            data={songs.songList}
-            getItemLayout={(_, index) => (
-              { length: componentWidth, offset: componentWidth * index, index }
-            )}
-            horizontal
-            keyExtractor={(i) => i.id.toString()}
-            onScroll={onScroll}
-            onMomentumScrollEnd={() => {
-              if (hoveredSongIndex !== undefined) {
-                settings.set({ selectedSongId: songs.songList[hoveredSongIndex].id })
-              }
-            }}
-            renderItem={(i) => (
-              <View style={{ width: componentWidth, alignItems: 'center' }}>
-                <Paper
-                  style={{
-                    flexDirection: "row", flex: 1, aspectRatio: 1, backgroundColor: undefined, margin: 24,
-                  }}
-                >
-                  <Image
-                    style={{
-                      flex: 1,
-                      aspectRatio: 1,
-                    }}
-                    resizeMode="cover"
-                    source={i.item.albumArt}
-                  />
-                </Paper>
-              </View>
-            )}
-          />
+          <ScrollingList width={scrollerWidth} />
         </View>
         <View
           style={{
@@ -164,7 +119,66 @@ export function FullPlayer(props: { onPressClose: () => void }) {
           </View>
         </View>
       </LinearGradient>
-    </InterpolatingBackground>
+    </Animated.View>
   );
 }
 
+function ScrollingList(props: { width: number }) {
+  const settings = useSettings();
+  const songs = useSongs();
+
+  const flatList = createRef<FlatList>();
+  const [hoveredSongIndex, setHoveredSongIndex] = useState<number | undefined>();
+
+  const onScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const index = Math.abs(Math.round(event.nativeEvent.contentOffset.x / props.width));
+    setHoveredSongIndex(index)
+  }, [props.width]);
+
+  useEffect(() => {
+    if (flatList.current && songs.selectedSong) {
+      flatList.current.scrollToIndex({ index: songs.songList.indexOf(songs.selectedSong) })
+    }
+  }, [songs.selectedSong])
+
+  return (
+
+    <FlatList
+      ref={flatList}
+      snapToAlignment="center"
+      snapToInterval={props.width}
+      showsHorizontalScrollIndicator={false}
+      decelerationRate={"fast"}
+      data={songs.songList}
+      getItemLayout={(_, index) => (
+        { length: props.width, offset: props.width * index, index }
+      )}
+      horizontal
+      keyExtractor={(i) => i.id.toString()}
+      onScroll={onScroll}
+      onMomentumScrollEnd={() => {
+        if (hoveredSongIndex !== undefined) {
+          settings.set({ selectedSongId: songs.songList[hoveredSongIndex].id })
+        }
+      }}
+      renderItem={(i) => (
+        <View style={{ width: props.width, alignItems: 'center' }}>
+          <Paper
+            style={{
+              flexDirection: "row", flex: 1, aspectRatio: 1, backgroundColor: undefined, margin: 24,
+            }}
+          >
+            <Image
+              style={{
+                flex: 1,
+                aspectRatio: 1,
+              }}
+              resizeMode="cover"
+              source={i.item.albumArt}
+            />
+          </Paper>
+        </View>
+      )}
+    />
+  )
+}

@@ -1,45 +1,73 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { createRef, useCallback, useEffect, useState } from "react";
-import { Dimensions, FlatList, Image, NativeScrollEvent, NativeSyntheticEvent, TouchableOpacity, View } from "react-native";
+import { FlatList, Image, NativeScrollEvent, NativeSyntheticEvent, Pressable, TouchableOpacity, View } from "react-native";
+import Animated from "react-native-reanimated";
 import { useSettings } from "../hooks/useSettings";
 import { useSongs } from "../hooks/useSongs";
-import { InterpolatingBackground } from "./ui-kit/InterpolatingBackground";
+import { useAnimatedBackgroundColor } from "../hooks/useAnimatedBackgroundColor";
 import { Typography } from "./ui-kit/Themed";
 
-const componentPadding = 6;
-const componentWidth = Dimensions.get("window").width - componentPadding;
-
 export function MiniPlayer(props: { onPress: () => void }) {
+  const [scrollerWidth, setScrollerWidth] = useState<number>(0);
   const songs = useSongs();
+  const animatedBackgroundColor = useAnimatedBackgroundColor(songs.selectedSong?.color ?? "#000");
 
   return (
     <View
       style={{
         flex: 1,
-        padding: componentPadding,
+        padding: 6,
       }}
     >
-      <InterpolatingBackground
-        backgroundColor={songs.selectedSong?.color ?? "#000"}
-        style={{
+      <Animated.View
+        style={[animatedBackgroundColor, {
           flex: 1,
           borderRadius: 6,
           overflow: 'hidden',
-        }}
+        }]}
       >
-        <View style={{
+        <TouchableOpacity onPress={props.onPress} style={{
           flex: 1,
           backgroundColor: "rgba(0,0,0,0.7)",
+          flexDirection: 'row',
+          alignItems: 'center',
         }}>
-          <ScrollingList {...props} />
-        </View>
-      </InterpolatingBackground>
-    </View >
+          <Image
+            style={{
+              borderRadius: 5,
+              aspectRatio: 1,
+              flex: 1,
+              margin: 6
+            }}
+            source={songs.selectedSong?.albumArt}
+          />
+
+          <View
+            onLayout={(e) => {
+              setScrollerWidth(e.nativeEvent.layout.width)
+            }}
+            style={{
+              flex: 6,
+            }}>
+            <ScrollingList width={scrollerWidth} onPress={props.onPress} />
+          </View>
+
+          <View style={{
+            flex: 1, alignItems: 'center'
+          }}>
+            <Typography>
+              <Ionicons size={26} name="play" />
+            </Typography>
+          </View>
+
+        </TouchableOpacity>
+      </Animated.View>
+    </View>
   );
 }
 
 
-function ScrollingList(props: { onPress: () => void }) {
+function ScrollingList(props: { width: number; onPress: () => void }) {
   const songs = useSongs();
   const settings = useSettings();
 
@@ -47,9 +75,9 @@ function ScrollingList(props: { onPress: () => void }) {
   const [hoveredSongIndex, setHoveredSongIndex] = useState<number | undefined>();
 
   const onScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const index = Math.abs(Math.round(event.nativeEvent.contentOffset.x / componentWidth));
+    const index = Math.abs(Math.round(event.nativeEvent.contentOffset.x / props.width));
     setHoveredSongIndex(index)
-  }, []);
+  }, [props.width]);
 
   useEffect(() => {
     if (flatList.current && songs.selectedSong) {
@@ -60,14 +88,14 @@ function ScrollingList(props: { onPress: () => void }) {
   return (
     <FlatList
       ref={flatList}
-      style={{ flex: 1 }}
+      style={{ width: props.width }}
       snapToAlignment="center"
-      snapToInterval={componentWidth}
+      snapToInterval={props.width}
       showsHorizontalScrollIndicator={false}
       decelerationRate={"fast"}
       data={songs.songList}
       getItemLayout={(_, index) => (
-        { length: componentWidth, offset: componentWidth * index, index }
+        { length: props.width, offset: props.width * index, index }
       )}
       horizontal
       keyExtractor={(i) => i.id.toString()}
@@ -78,38 +106,11 @@ function ScrollingList(props: { onPress: () => void }) {
         }
       }}
       renderItem={(i) => (
-        <TouchableOpacity
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "flex-start",
-            padding: 6,
-            width: componentWidth,
-          }}
-
-          onPress={props.onPress}
-        >
-          <Image
-            style={{
-              flex: 1,
-              borderRadius: 5,
-              aspectRatio: 1,
-              marginRight: 10,
-            }}
-            source={i.item.albumArt}
-          />
-
-          <View style={{ flex: 6 }}>
-            <Typography>{i.item.song}</Typography>
-            <Typography intent="muted">{i.item.artist}</Typography>
-          </View>
-
-          <View style={{ flex: 1, alignItems: 'center' }}>
-            <Typography>
-              <Ionicons size={26} name="play" />
-            </Typography>
-          </View>
-        </TouchableOpacity>
-      )} />
+        <Pressable onPress={props.onPress} style={{ width: props.width, justifyContent: 'center' }}>
+          <Typography>{i.item.song}</Typography>
+          <Typography intent="muted">{i.item.artist}</Typography>
+        </Pressable>
+      )}
+    />
   )
 }
